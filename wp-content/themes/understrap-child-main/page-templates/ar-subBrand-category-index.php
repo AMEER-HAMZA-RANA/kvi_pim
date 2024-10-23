@@ -55,6 +55,15 @@ $ar_active_cat = $stm->get_current_sub_brands_category();
   justify-content: center;
 }
 
+.main_item {
+  flex: 1 1 30%;
+  /* box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); */
+  margin: 0;
+  max-width: 145px;
+  /* border: 1px solid black; */
+  position: relative;
+}
+
 .product-item {
   flex: 1 1 30%;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
@@ -85,9 +94,13 @@ $ar_active_cat = $stm->get_current_sub_brands_category();
   text-align: center;
   /* margin-top: 5px; */
   font-weight: bold;
-  position: absolute;
-  left: 37%;
-  bottom: -20px;
+  display: block;
+  font-size: 13px;
+  text-decoration: none;
+  margin-top: 5px;
+  /* position: absolute; */
+  /* left: 37%;
+  bottom: -20px; */
 }
 
 /*
@@ -432,10 +445,10 @@ document.addEventListener('DOMContentLoaded', function() {
             //                 </div>
 
             const productItemHtml = `
-                        <div class="product-item px-0">
+                  <div class="main_item px-0">
+                        <div class="product-item">
                             <a href="/arrow/products/view/${item.id}">
                                 <img src="${item.main_image}" alt="${item.title}" onerror="this.onerror=null;this.src='https://upload.wikimedia.org/wikipedia/commons/a/a3/Image-not-found.png';">
-                                <div class="product-id">${item.sku}</div>
                             </a>
 
 
@@ -451,7 +464,9 @@ document.addEventListener('DOMContentLoaded', function() {
 											</div>
 
 
-                        </div>
+                      </div>
+                      <a href="/arrow/products/view/${item.id}" class="product-id">${item.sku}</a>
+                    </div>
                     `;
 
             productItemsGrid.innerHTML += productItemHtml;

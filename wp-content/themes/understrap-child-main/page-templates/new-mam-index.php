@@ -441,8 +441,8 @@ document.addEventListener('DOMContentLoaded', function() {
         body: new URLSearchParams({
           limit,
           page,
-          media_type: mediaType, // Include media type in the request
-          search: document.querySelector('input#media-search-input')?.value,
+          media_type: mediaType ? mediaType : 'all', // Include media type in the request
+          search: document.querySelector('input#media-search-input')?.value || '',
           // exact_search: document.querySelector('#filter_sku_exact').checked ? 1 : 0,
           action: 'fetch_media_items',
           _wpnonce: '<?php echo wp_create_nonce('fetch_media_items'); ?>'

@@ -4,6 +4,7 @@
 defined( 'ABSPATH' ) || exit;
 // require_once( get_template_directory() ."/inc/settings/QueueManager.php");
 require_once( get_theme_file_path() ."/inc/filters/ProductsFilters.php");
+require_once( get_theme_file_path() ."/inc/filters/MAMFilters.php");
 
 
 class SettingsManager {
@@ -1349,10 +1350,6 @@ function fetch_product_items() {
 
     // Check if each media item is a favorite
     foreach ($result['media_items'] as &$media_item) {
-        // $favorite_count = $wpdb->get_var($wpdb->prepare(
-        //     "SELECT COUNT(*) FROM bui_pods_favorites WHERE user_id = %d AND item_id = %d AND item_type = 'media' AND brand_id = 1",
-        //     $user_id, $media_item['id']
-        // ));
 				$favorite_count = $wpdb->get_var($wpdb->prepare(
 					"SELECT COUNT(*) FROM pim_favorites WHERE user_id = %d AND item_id = %d AND item_type = 'media' AND brand_id = %d",
 					$user_id, $media_item['id'], $media_item['brand_id']
@@ -1372,58 +1369,6 @@ function fetch_media_from_db($limit = 28, $offset = 0, $media_type = 'all', $sea
     global $wpdb;
     $table_name = 'pim_media';
     $media_assignments_table = 'pim_media_assignments';
-
-    // If media_group_id is provided, fetch all assignments for that group
-	// 	if ($media_group_id) {
-	// 		// Get all media_assignment_ids for the provided media_group_id
-	// 		$assignment_ids = $wpdb->get_col($wpdb->prepare(
-	// 				"SELECT id FROM $media_assignments_table WHERE media_group_id = %d",
-	// 				$media_group_id
-	// 		));
-
-	// 		if (empty($assignment_ids)) {
-	// 				return [
-	// 						'media_items' => [],
-	// 						'total_media_count' => 0,
-	// 				];
-	// 		}
-
-	// 		// Prepare placeholders for assignment IDs
-	// 		$ids_placeholders = implode(',', array_fill(0, count($assignment_ids), '%d'));
-
-	// 		// Modify SQL query to filter by media_type in pim_media_assignments (if applicable)
-	// 		$media_type_condition = '';
-	// 		$media_type_params = [];
-
-	// 		if ($media_type && $media_type != 'all') {
-	// 				$media_type_condition = " AND ma.file_type = %s"; // 'ma' is the alias for pim_media_assignments
-	// 				$media_type_params[] = $media_type;
-	// 		}
-
-	// 		// Fetch total media count with media type filtering
-	// 		$total_media_count = $wpdb->get_var($wpdb->prepare(
-	// 				"SELECT COUNT(*)
-	// 				 FROM $table_name m
-	// 				 JOIN $media_assignments_table ma ON m.media_assignment_id = ma.id
-	// 				 WHERE ma.media_assignment_id IN ($ids_placeholders) $media_type_condition",
-	// 				...array_merge($assignment_ids, $media_type_params)
-	// 		));
-
-	// 		// Fetch media items with media type filtering
-	// 		$media_items = $wpdb->get_results($wpdb->prepare(
-	// 				"SELECT m.*
-	// 				 FROM $table_name m
-	// 				 JOIN $media_assignments_table ma ON m.media_assignment_id = ma.id
-	// 				 WHERE ma.media_assignment_id IN ($ids_placeholders) $media_type_condition
-	// 				 LIMIT %d OFFSET %d",
-	// 				...array_merge($assignment_ids, $media_type_params, [$limit, $offset])
-	// 		), ARRAY_A);
-
-	// 		return [
-	// 				'media_items' => $media_items,
-	// 				'total_media_count' => $total_media_count,
-	// 		];
-	// }
 
     if ($media_group_id) {
 
@@ -1474,15 +1419,6 @@ function fetch_media_from_db($limit = 28, $offset = 0, $media_type = 'all', $sea
 						...array_merge($assignment_ids, [$limit, $offset])
 				), ARRAY_A);
 
-				// cannot get the filtered prods (based on media_type) : ISSUE.
-				// if($media_type && $media_type != 'all') {
-				// 	$media_items = array_filter($media_items, function($m_item) use($media_type) {
-				// 		return $m_item['file_type'] == $media_type;
-				// 	});
-				// }
-
-				///// ISSUE END
-
 				return [
 						'media_items' => $media_items,
 						'total_media_count' => $total_media_count,
@@ -1522,17 +1458,6 @@ if (!empty($search)) {
 
 			} else {
 
-				// if search characters exist
-				// if (!empty($search)) {
-
-				// 	$searched_data = $this->get_matching_media_items($search, $limit, $offset);
-
-				// 	$media_items = $searched_data['media_items'];
-				// 	$total_media_count = $searched_data['total_media_count'];
-
-
-				// } else {
-
 				// Get IDs of the media assignments matching the selected type
 					$assignment_ids = $wpdb->get_col($wpdb->prepare(
 							"SELECT id FROM $media_assignments_table WHERE file_type = %s",
@@ -1560,7 +1485,6 @@ if (!empty($search)) {
 							...array_merge($assignment_ids, [$limit, $offset])
 					), ARRAY_A);
 						}
-		// }
 		}
 
 
@@ -1614,108 +1538,24 @@ public function get_matching_media_items($search, $limit, $offset, $media_group_
 									...array_merge($assignment_ids, ['%' . $wpdb->esc_like($search) . '%',$limit, $offset])
 							), ARRAY_A);
 
-// 0000000000000000000000000000000
-
-						// 	$query = "SELECT * FROM pim_media WHERE title LIKE %s LIMIT %d OFFSET %d";
-						// 		$media_items = $wpdb->get_results($wpdb->prepare($query, '%' . $wpdb->esc_like($search) . '%', $limit, $offset), ARRAY_A);
-						// // }
-
-						// Fetch total count for pagination
-						// if ($exact_search) {
-						// 		$count_query = "SELECT COUNT(*) FROM pim_products WHERE sku = %s";
-						// 		$total_product_count = $wpdb->get_var($wpdb->prepare($count_query, $search));
-						// } else {
-								// $count_query = "SELECT COUNT(*) FROM pim_media WHERE title LIKE %s";
-								// $total_media_count = $wpdb->get_var($wpdb->prepare($count_query, '%' . $wpdb->esc_like($search) . '%'));
-							// cannot get the filtered prods (based on media_type) : ISSUE.
-							// if($media_type && $media_type != 'all') {
-							// 	$media_items = array_filter($media_items, function($m_item) use($media_type) {
-							// 		return $m_item['file_type'] == $media_type;
-							// 	});
-							// }
-
-							///// ISSUE END
-
-							// return [
-							// 		'media_items' => $media_items,
-							// 		'total_media_count' => $total_media_count,
-							// ];
 					} else {
 
-				// 		if($media_type == true && $media_type != 'all' && $search == true) {
-
-				// 			// Get IDs of the media assignments matching the selected type
-				// 	$assignment_ids = $wpdb->get_col($wpdb->prepare(
-				// 			"SELECT id FROM $media_assignments_table WHERE file_type = %s",
-				// 			$media_type
-				// 	));
-
-				// 	if (empty($assignment_ids)) {
-				// // die("OK");
-
-				// 			return [
-				// 					'media_items' => [],
-				// 					'total_media_count' => 0,
-				// 			];
-				// 	}
-
-				// 	$ids_placeholders = implode(',', array_fill(0, count($assignment_ids), '%d'));
-
-				// 	$total_media_count = $wpdb->get_var($wpdb->prepare(
-				// 			"SELECT COUNT(*) FROM $table_name WHERE media_assignment_id AND WHERE title LIKE %s IN ($ids_placeholders)", '%' . $wpdb->esc_like($search) . '%', ...$assignment_ids
-				// 	));
-
-				// 	$media_items = $wpdb->get_results($wpdb->prepare(
-				// 			"SELECT * FROM $table_name WHERE media_assignment_id AND WHERE title LIKE %s IN ($ids_placeholders) LIMIT %d OFFSET %d",
-				// 			...array_merge(['%' . $wpdb->esc_like($search) . '%', $assignment_ids], [$limit, $offset])
-				// 	), ARRAY_A);
-
-				// 		} else {
-
-							// 		// Exact search using '='
-							// 		$query = "SELECT * FROM pim_products WHERE sku = %s LIMIT %d OFFSET %d";
-							// 		$results = $wpdb->get_results($wpdb->prepare($query, $search, $limit, $offset), ARRAY_A);
-							// } else {
+				
 									// Partial search using 'LIKE'
 									$query = "SELECT * FROM pim_media WHERE title LIKE %s LIMIT %d OFFSET %d";
 									$media_items = $wpdb->get_results($wpdb->prepare($query, '%' . $wpdb->esc_like($search) . '%', $limit, $offset), ARRAY_A);
-							// }
-
-							// Fetch total count for pagination
-							// if ($exact_search) {
-							// 		$count_query = "SELECT COUNT(*) FROM pim_products WHERE sku = %s";
-							// 		$total_product_count = $wpdb->get_var($wpdb->prepare($count_query, $search));
-							// } else {
+						
 									$count_query = "SELECT COUNT(*) FROM pim_media WHERE title LIKE %s";
 									$total_media_count = $wpdb->get_var($wpdb->prepare($count_query, '%' . $wpdb->esc_like($search) . '%'));
-						// }
-
-						// }
-
-
-						// Check if each product item is a favorite
-			// 	if (!empty($results)) {
-			// 		foreach ($results as &$product_item) {
-			// 				$favorite_count = $wpdb->get_var($wpdb->prepare(
-			// 						"SELECT COUNT(*) FROM pim_favorites WHERE user_id = %d AND item_id = %d AND item_type = 'product' AND brand_id = %d",
-			// 						$user_id, $product_item['id'], $product_item['brand_id']
-			// 				));
-			// 				$product_item['is_favorite'] = $favorite_count > 0;
-			// 				$product_item['main_image'] = $this->get_media_url($product_item['main_image'], 'thumbnail');
-			// 		}
-			// }
+					
 					}
 
-	// wp_send_json_success([
-	// 		'product_items' => $results,
-	// 		'total_product_count' => $total_product_count,
-	// ]);
+	
 	return [
 		'media_items' => $media_items,
 		'total_media_count' => $total_media_count,
 ];
 
-	// die();
 }
 
 

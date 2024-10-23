@@ -40,7 +40,15 @@ $navbar_type       = get_theme_mod( 'understrap_navbar_type', 'collapse' );
 
       <div class="header-main">
 
-        <?php  require( locate_template( 'template-parts/brand-index-header.php', false, false ) );?>
+
+        <?php 
+        if(get_query_var('pg') == 'mam') {
+          require( locate_template( 'template-parts/mam-index-header.php', false, false ) );
+        } else {
+          require( locate_template( 'template-parts/brand-index-header.php', false, false ) );
+        }
+        
+        ?>
         <?php // require( locate_template( 'template-parts/mobile-header.php', false, false ) );?>
 
       </div>

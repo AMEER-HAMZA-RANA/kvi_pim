@@ -14,7 +14,11 @@
 
                 <?php
 									//$sm = StateManager::GI();
-									$stm->setup_products_filters();
+									if(get_query_var('pg') == 'mam') {
+										$stm->setup_mam_filters();
+									} else {
+										$stm->setup_products_filters();
+									}
 								?>
               </div>
 

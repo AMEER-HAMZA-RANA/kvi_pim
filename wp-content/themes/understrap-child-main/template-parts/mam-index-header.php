@@ -5,7 +5,7 @@
 	// $sm = StateManager::GI();
 	$stm = SettingsManager::GI();
 
-	$options = $sm->options;
+	// $options = $stm->options;
 	// $active_theme_prefix =  $sm->current_brand->brand_code;
 	// $media_types = $sm->mam->get_media_types();
 	// $active_media_type = $sm->mam->get_current_media_type();
